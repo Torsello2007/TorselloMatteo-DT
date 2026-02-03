@@ -6,45 +6,76 @@ load_dotenv()
 
 class DatabaseWrapper:
     def __init__(self):
-        # Recupero credenziali dal file .env (Requisito Commit 2)
-        self.host = os.getenv("DB_HOST")
-        self.user = os.getenv("DB_USER")
-        self.password = os.getenv("DB_PASSWORD")
-        self.port = int(os.getenv("DB_PORT"))
-        self.database = os.getenv("DB_NAME")
+        self.db_config = {
+            'host': os.getenv("DB_HOST"),
+            'user': os.getenv("DB_USER"),
+            'password': os.getenv("DB_PASSWORD"),
+            'database': os.getenv("DB_NAME"),
+            'port': int(os.getenv("DB_PORT")),
+            'cursorclass': pymysql.cursors.DictCursor
+        }
+        self.create_table()
 
-    def get_connection(self):
-        """Metodo di connessione"""
-        return pymysql.connect(
-            host=self.host,
-            user=self.user,
-            password=self.password,
-            port=self.port,
-            database=self.database,
-            cursorclass=pymysql.cursors.DictCursor
-        )
+    def connect(self):
+        return pymysql.connect(**self.db_config)
 
-    def create_tables(self):
-        """Crea le tabelle con SQL manuale (Vincolo: NO ORM)"""
-        connection = self.get_connection()
+    def execute_query(self, query, params=()):
+        conn = self.connect()
         try:
-            with connection.cursor() as cursor:
-                # Query SQL scritta a mano come richiesto
-                sql = """
-                CREATE TABLE IF NOT EXISTS deliveries (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    tracking_code VARCHAR(50) NOT NULL UNIQUE,
-                    recipient VARCHAR(100) NOT NULL,
-                    address VARCHAR(255) NOT NULL,
-                    time_slot VARCHAR(50) NOT NULL,
-                    status ENUM('READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'FAILED') DEFAULT 'READY',
-                    priority ENUM('LOW', 'MEDIUM', 'HIGH') DEFAULT 'LOW'
-                )
-                """
-                cursor.execute(sql)
-            connection.commit()
-            print("Tabella verificata correttamente.")
-        except Exception as e:
-            print(f"Errore: {e}")
+            with conn.cursor() as cursor:
+                cursor.execute(query, params)
+                conn.commit()
         finally:
-            connection.close()
+            conn.close()
+
+    def fetch_query(self, query, params=()):
+        conn = self.connect()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params)
+                return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def create_table(self):
+        query = '''
+        CREATE TABLE IF NOT EXISTS deliveries (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            tracking_code VARCHAR(100) NOT NULL UNIQUE,
+            recipient VARCHAR(255) NOT NULL,
+            address VARCHAR(255) NOT NULL,
+            time_slot VARCHAR(100) NOT NULL,
+            status ENUM('READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'FAILED') DEFAULT 'READY',
+            priority ENUM('LOW', 'MEDIUM', 'HIGH') DEFAULT 'LOW'
+        )
+        '''
+        self.execute_query(query)
+
+    def get_all_deliveries(self):
+        return self.fetch_query("SELECT * FROM deliveries")
+
+    def add_delivery(self, tracking, recipient, address, time_slot, priority):
+        query = "INSERT INTO deliveries (tracking_code, recipient, address, time_slot, priority) VALUES (%s, %s, %s, %s, %s)"
+        params = (tracking, recipient, address, time_slot, priority)
+        try:
+            self.execute_query(query, params)
+            return True
+        except: return False
+
+    # AGGIUNTA PER COMMIT 6
+    def update_status(self, delivery_id, new_status):
+        query = "UPDATE deliveries SET status = %s WHERE id = %s"
+        try:
+            self.execute_query(query, (new_status, delivery_id))
+            return True
+        except: return False
+
+
+    def update_status(self, delivery_id, new_status):
+        """Aggiorna lo stato di una consegna (Richiesto Commit 6)"""
+        query = "UPDATE deliveries SET status = %s WHERE id = %s"
+        try:
+            self.execute_query(query, (new_status, delivery_id))
+            return True
+        except:
+            return False

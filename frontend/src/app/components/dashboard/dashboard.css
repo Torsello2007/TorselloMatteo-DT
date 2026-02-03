@@ -1,0 +1,19 @@
+.container { padding: 20px; font-family: sans-serif; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-left: 10px solid #ccc; /* Bordo laterale richiesto */
+}
+
+/* REGOLE VISIVE PDF */
+.READY { border-left-color: gray !important; }
+.OUT_FOR_DELIVERY { border-left-color: blue !important; }
+.DELIVERED { border-left-color: green !important; }
+.FAILED { border-left-color: red !important; }
+
+.card-header { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.card-body p { margin: 5px 0; font-size: 14px; }

@@ -1,0 +1,42 @@
+<div style="padding: 20px;">
+  <!-- FORM CREAZIONE (COMMIT 5) -->
+  <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <h3>Nuova Consegna</h3>
+    <input [(ngModel)]="newD.tracking_code" placeholder="Codice Tracking">
+    <input [(ngModel)]="newD.recipient" placeholder="Destinatario">
+    <input [(ngModel)]="newD.address" placeholder="Indirizzo">
+    <input [(ngModel)]="newD.time_slot" placeholder="Fascia (es. 14-16)">
+    <select [(ngModel)]="newD.priority">
+      <option value="LOW">LOW</option>
+      <option value="MEDIUM">MEDIUM</option>
+      <option value="HIGH">HIGH</option>
+    </select>
+    <button (click)="save()">Crea</button>
+  </div>
+
+  <h1>Dashboard Consegne</h1>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+    
+    <div *ngFor="let d of deliveries" class="card" [ngClass]="d.status" 
+         style="padding: 15px; border-radius: 8px; border-left: 10px solid #ccc; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      
+      <div style="display: flex; justify-content: space-between;">
+        <strong>#{{ d.tracking_code }}</strong>
+        <!-- Badge Priorità (Commit 5) -->
+        <span *ngIf="d.priority === 'HIGH'" style="background: red; color: white; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold;">URGENTE</span>
+      </div>
+      
+      <p>{{ d.recipient }}</p>
+      <p>{{ d.address }}</p>
+      <p>{{ d.time_slot }}</p>
+      <p><b>Stato: {{ d.status }}</b></p>
+
+      <!-- BOTTONI AGGIORNAMENTO (COMMIT 6) -->
+      <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+        <button (click)="changeStatus(d.id, 'OUT_FOR_DELIVERY')">🚚 Spedisci</button>
+        <button (click)="changeStatus(d.id, 'DELIVERED')" style="color: green;">✅ Consegnata</button>
+        <button (click)="changeStatus(d.id, 'FAILED')" style="color: red;">❌ Fallita</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,13 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Frontend</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-</body>
-</html>
+<div class="container">
+  <h1>Dashboard Consegne</h1>
+  
+  <div class="grid">
+    <!-- ngClass applica il colore del bordo in base allo stato -->
+    <div *ngFor="let d of deliveries" class="card" [ngClass]="d.status">
+      <div class="card-header">
+        <strong>Tracking: #{{ d.tracking_code }}</strong>
+      </div>
+      
+      <div class="card-body">
+        <p><b>Destinatario:</b> {{ d.recipient }}</p>
+        <p><b>Indirizzo:</b> {{ d.address }}</p>
+        <p><b>Fascia:</b> {{ d.time_slot }}</p>
+        <p><b>Stato:</b> {{ d.status }}</p>
+      </div>
+    </div>
+  </div>
+</div>
